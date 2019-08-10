@@ -11,6 +11,7 @@ sqlalchemy-utils = "*"
 pymysql = "*"
 flask = "*"
 flask-restful = "*"
+email-validator = "*"
 
 [requires]
 python_version = "3.6"
