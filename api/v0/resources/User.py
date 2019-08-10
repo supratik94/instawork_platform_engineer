@@ -19,8 +19,7 @@ class User(API_Resource):
             location="args",
         )
         data = parser.parse_args()
-        print(data)
-        print(self.session.query(UserSchema).all())
+
         if data["employee_id"] is None:
             employee_list = list()
             records = self.session.query(UserSchema).all()
@@ -97,4 +96,27 @@ class User(API_Resource):
         pass
 
     def delete(self):
-        pass
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            "employee_id",
+            help="Employee ID to fetch details for",
+            required=False,
+            type=int,
+            location="args",
+        )
+        data = parser.parse_args()
+        try:
+            record = (
+                self.session.query(UserSchema)
+                .filter(UserSchema.id == data["employee_id"])
+                .one()
+            )
+            self.session.delete(record)
+            self.session.commit()
+
+            return []
+        except sqlalchemy.orm.exc.NoResultFound:
+            return (
+                {"message": f"No record found with employee_id: {data['employee_id']}"},
+                400,
+            )
