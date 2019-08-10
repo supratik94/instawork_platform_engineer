@@ -1,4 +1,4 @@
-__name__ = "Supratik Majumdar"
+__author__ = "Supratik Majumdar"
 __status__ = "Development"
 
 from data_store.models import Base
