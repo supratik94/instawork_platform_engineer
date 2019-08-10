@@ -3,7 +3,7 @@ __status__ = "Development"
 
 import os
 from sqlalchemy import create_engine
-from data_store.models import Base
+from api.models import Base
 from sqlalchemy_utils import create_database, database_exists
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 __author__ = "Supratik Majumdar"
 __status__ = "Development"
 
-from data_store.models import Base
+from api.models import Base
 from sqlalchemy import Column, Integer, String, UniqueConstraint
 
 
