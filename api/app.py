@@ -2,7 +2,7 @@ __author__ = "Supratik Majumdar"
 __status__ = "Development"
 
 from flask import Flask
-from v0 import v0_blueprint
+from .v0 import v0_blueprint
 
 
 def create_app():
