@@ -6,6 +6,10 @@ from flask_restful import Resource
 from flask_restful import reqparse
 from .Resource import API_Resource
 from ...models import User as UserSchema
+from flask import jsonify, make_response
+
+from ...utilities import validate_mobile_number
+from email_validator import validate_email, EmailNotValidError
 
 
 class User(API_Resource):
@@ -90,7 +94,29 @@ class User(API_Resource):
             type=str,
             location="json",
         )
-        print(parser.parse_args())
+
+        data = parser.parse_args()
+        # Validate email
+        try:
+            validate_email(
+                email=data["e_mail"], check_deliverability=False
+            )  # validate and get info
+        except EmailNotValidError as e:
+            # email is not valid, exception message is human-readable
+            return {"message": str(e)}, 400
+
+        # Validate mobile number
+        try:
+            validate_mobile_number(mobile_number=data["mobile"])
+        except ValueError as e:
+            return {"message": str(e)}, 400
+
+        # Check First Name and Last name have alteast one character
+        if len(data["first_name"]) == 0:
+            return {"message": "first_name requires atleast one character"}, 400
+
+        if len(data["last_name"]) == 0:
+            return {"message": "last_name requires atleast one character"}, 400
 
     def patch(self):
         pass
