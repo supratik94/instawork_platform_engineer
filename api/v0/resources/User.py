@@ -118,6 +118,39 @@ class User(API_Resource):
         if len(data["last_name"]) == 0:
             return {"message": "last_name requires atleast one character"}, 400
 
+        record = UserSchema(
+            first_name=data["first_name"].strip().upper(),
+            last_name=data["last_name"].strip().upper(),
+            e_mail=data["e_mail"].strip().upper(),
+            mobile=data["mobile"].strip(),
+            role=data["role"].strip().upper(),
+        )
+
+        try:
+            self.session.add(record)
+            self.session.commit()
+            record = (
+                self.session.query(UserSchema)
+                .filter(UserSchema.mobile == data["mobile"])
+                .one()
+            )
+            return {
+                "employee_id": record.id,
+                "first_name": record.first_name,
+                "last_name": record.last_name,
+                "mobile": record.mobile,
+                "e_mail": record.e_mail,
+                "role": record.role,
+            }
+        except sqlalchemy.exc.IntegrityError as e:
+            self.session.rollback()
+            error_message = e.args[0]
+            if "E_MAIL_UNIQUE_KEY" in error_message:
+                return {"message": "e_mail already in use"}, 400
+
+            if "MOBILE_UNIQUE_KEY" in error_message:
+                return {"message": "mobile already in use"}, 400
+
     def patch(self):
         pass
 
