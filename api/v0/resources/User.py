@@ -134,14 +134,17 @@ class User(API_Resource):
                 .filter(UserSchema.mobile == data["mobile"])
                 .one()
             )
-            return {
-                "employee_id": record.id,
-                "first_name": record.first_name,
-                "last_name": record.last_name,
-                "mobile": record.mobile,
-                "e_mail": record.e_mail,
-                "role": record.role,
-            }
+            return (
+                {
+                    "employee_id": record.id,
+                    "first_name": record.first_name,
+                    "last_name": record.last_name,
+                    "mobile": record.mobile,
+                    "e_mail": record.e_mail,
+                    "role": record.role,
+                },
+                201,
+            )
         except sqlalchemy.exc.IntegrityError as e:
             self.session.rollback()
             error_message = e.args[0]
@@ -152,7 +155,100 @@ class User(API_Resource):
                 return {"message": "mobile already in use"}, 400
 
     def patch(self):
-        pass
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            "employee_id",
+            help="Employee ID to fetch details for",
+            required=True,
+            type=int,
+            location="args",
+        )
+        parser.add_argument(
+            "first_name",
+            help="First Name of Employee is mandatory",
+            required=False,
+            type=str,
+            location="json",
+        )
+        parser.add_argument(
+            "last_name",
+            help="Last Name of Employee is mandatory",
+            required=False,
+            type=str,
+            location="json",
+        )
+        parser.add_argument(
+            "e_mail",
+            help="E-mail of Employee is mandatory",
+            required=False,
+            type=str,
+            location="json",
+        )
+        parser.add_argument(
+            "mobile",
+            help="Mobile Number of Employee is mandatory",
+            required=False,
+            type=str,
+            location="json",
+        )
+        parser.add_argument(
+            "role",
+            help="Role for Employee is mandatory",
+            required=False,
+            type=str,
+            location="json",
+        )
+        data = parser.parse_args()
+        update_dict = dict()
+
+        for key, value in data.items():
+            if key != "employee_id":
+                if value is not None:
+                    update_dict[key] = data[key]
+
+        if len(update_dict) == 0:
+            return (
+                {"message": "Nothing to update, pass at least one field to update"},
+                400,
+            )
+
+        else:
+            try:
+                # Fetch to check if employee_id exists
+                record = (
+                    self.session.query(UserSchema)
+                    .filter(UserSchema.id == data["employee_id"])
+                    .one()
+                )
+
+                # Update Record
+                self.session.query(UserSchema).filter(
+                    UserSchema.id == data["employee_id"]
+                ).update(update_dict)
+                self.session.commit()
+
+                # Fetch Updated record and return
+                record = (
+                    self.session.query(UserSchema)
+                    .filter(UserSchema.id == data["employee_id"])
+                    .one()
+                )
+                return {
+                    "employee_id": record.id,
+                    "first_name": record.first_name,
+                    "last_name": record.last_name,
+                    "mobile": record.mobile,
+                    "e_mail": record.e_mail,
+                    "role": record.role,
+                }
+
+            except sqlalchemy.orm.exc.NoResultFound:
+                return (
+                    {
+                        "message": f"No record found with employee_id: {data['employee_id']}"
+                    },
+                    400,
+                )
 
     def delete(self):
         parser = reqparse.RequestParser()
@@ -173,7 +269,7 @@ class User(API_Resource):
             self.session.delete(record)
             self.session.commit()
 
-            return []
+            return [], 204
         except sqlalchemy.orm.exc.NoResultFound:
             return (
                 {"message": f"No record found with employee_id: {data['employee_id']}"},
