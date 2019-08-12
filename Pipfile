@@ -12,6 +12,8 @@ pymysql = "*"
 flask = "*"
 flask-restful = "*"
 email-validator = "*"
+gunicorn = "*"
+cryptography = "*"
 
 [requires]
 python_version = "3.6"
