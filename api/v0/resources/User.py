@@ -202,7 +202,7 @@ class User(API_Resource):
         for key, value in data.items():
             if key != "employee_id":
                 if value is not None:
-                    update_dict[key] = data[key]
+                    update_dict[key] = data[key].strip().upper()
 
         if len(update_dict) == 0:
             return (
