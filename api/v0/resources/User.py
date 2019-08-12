@@ -100,15 +100,15 @@ class User(API_Resource):
         # Validate email
         try:
             validate_email(
-                email=data["e_mail"], check_deliverability=False
+                email=data["email"], check_deliverability=False
             )  # validate and get info
         except EmailNotValidError as e:
             # email is not valid, exception message is human-readable
             return {"message": str(e)}, 400
 
-        # Validate mobile number
+        # Validate phone_number number
         try:
-            validate_mobile_number(mobile_number=data["mobile"])
+            validate_mobile_number(mobile_number=data["phone_number"])
         except ValueError as e:
             return {"message": str(e)}, 400
 
@@ -122,8 +122,8 @@ class User(API_Resource):
         record = UserSchema(
             first_name=data["first_name"].strip().upper(),
             last_name=data["last_name"].strip().upper(),
-            e_mail=data["e_mail"].strip().upper(),
-            mobile=data["mobile"].strip(),
+            email=data["email"].strip().upper(),
+            phone_number=data["phone_number"].strip(),
             role=data["role"].strip().upper(),
         )
 
@@ -132,7 +132,7 @@ class User(API_Resource):
             self.session.commit()
             record = (
                 self.session.query(UserSchema)
-                .filter(UserSchema.mobile == data["mobile"])
+                .filter(UserSchema.phone_number == data["phone_number"])
                 .one()
             )
             return (
