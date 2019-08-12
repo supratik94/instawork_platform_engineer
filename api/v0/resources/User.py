@@ -32,8 +32,8 @@ class User(API_Resource):
                     "employee_id": record.id,
                     "first_name": record.first_name,
                     "last_name": record.last_name,
-                    "mobile": record.mobile,
-                    "e_mail": record.e_mail,
+                    "phone_number": record.phone_number,
+                    "email": record.email,
                     "role": record.role,
                 }
                 employee_list.append(employee_dict)
@@ -50,8 +50,8 @@ class User(API_Resource):
                     "employee_id": record.id,
                     "first_name": record.first_name,
                     "last_name": record.last_name,
-                    "mobile": record.mobile,
-                    "e_mail": record.e_mail,
+                    "phone_number": record.phone_number,
+                    "email": record.email,
                     "role": record.role,
                 }
             except sqlalchemy.orm.exc.NoResultFound:
@@ -61,38 +61,39 @@ class User(API_Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(
             "first_name",
-            help="First Name of Employee is mandatory",
+            help="first_name of Employee is mandatory",
             required=True,
             type=str,
             location="json",
         )
         parser.add_argument(
             "last_name",
-            help="Last Name of Employee is mandatory",
+            help="last_name of Employee is mandatory",
             required=True,
             type=str,
             location="json",
         )
         parser.add_argument(
-            "e_mail",
-            help="E-mail of Employee is mandatory",
+            "email",
+            help="email of Employee is mandatory",
             required=True,
             type=str,
             location="json",
         )
         parser.add_argument(
-            "mobile",
-            help="Mobile Number of Employee is mandatory",
+            "phone_number",
+            help="phone_number of Employee is mandatory",
             required=True,
             type=str,
             location="json",
         )
         parser.add_argument(
             "role",
-            help="Role for Employee is mandatory",
+            help="Role for Employee can only be admin or regualar",
             required=True,
             type=str,
             location="json",
+            choices=("admin", "regular"),
         )
 
         data = parser.parse_args()
@@ -112,10 +113,10 @@ class User(API_Resource):
             return {"message": str(e)}, 400
 
         # Check First Name and Last name have alteast one character
-        if len(data["first_name"]) == 0:
+        if len(data["first_name"].strip()) == 0:
             return {"message": "first_name requires atleast one character"}, 400
 
-        if len(data["last_name"]) == 0:
+        if len(data["last_name"].strip()) == 0:
             return {"message": "last_name requires atleast one character"}, 400
 
         record = UserSchema(
@@ -139,8 +140,8 @@ class User(API_Resource):
                     "employee_id": record.id,
                     "first_name": record.first_name,
                     "last_name": record.last_name,
-                    "mobile": record.mobile,
-                    "e_mail": record.e_mail,
+                    "phone_number": record.phone_number,
+                    "email": record.email,
                     "role": record.role,
                 },
                 201,
@@ -148,55 +149,52 @@ class User(API_Resource):
         except sqlalchemy.exc.IntegrityError as e:
             self.session.rollback()
             error_message = e.args[0]
-            if "E_MAIL_UNIQUE_KEY" in error_message:
-                return {"message": "e_mail already in use"}, 400
+            if "EMAIL_UNIQUE_KEY" in error_message:
+                return {"message": "email already in use"}, 400
 
-            if "MOBILE_UNIQUE_KEY" in error_message:
-                return {"message": "mobile already in use"}, 400
+            if "PHONE_NUMBER_UNIQUE_KEY" in error_message:
+                return {"message": "phone_number already in use"}, 400
 
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
             "employee_id",
-            help="Employee ID to fetch details for",
+            help="employee_id to update details for",
             required=True,
             type=int,
             location="args",
         )
         parser.add_argument(
             "first_name",
-            help="First Name of Employee is mandatory",
+            help="first_name of Employee",
             required=False,
             type=str,
             location="json",
         )
         parser.add_argument(
             "last_name",
-            help="Last Name of Employee is mandatory",
+            help="last_name of Employee",
             required=False,
             type=str,
             location="json",
         )
         parser.add_argument(
-            "e_mail",
-            help="E-mail of Employee is mandatory",
-            required=False,
-            type=str,
-            location="json",
+            "email", help="email of Employee", required=True, type=str, location="json"
         )
         parser.add_argument(
-            "mobile",
-            help="Mobile Number of Employee is mandatory",
+            "phone_number",
+            help="phone_number of Employee",
             required=False,
             type=str,
             location="json",
         )
         parser.add_argument(
             "role",
-            help="Role for Employee is mandatory",
+            help="Role for Employee can only be admin or regualar",
             required=False,
             type=str,
             location="json",
+            choices=("admin", "regular"),
         )
         data = parser.parse_args()
         update_dict = dict()
@@ -237,8 +235,8 @@ class User(API_Resource):
                     "employee_id": record.id,
                     "first_name": record.first_name,
                     "last_name": record.last_name,
-                    "mobile": record.mobile,
-                    "e_mail": record.e_mail,
+                    "phone_number": record.phone_number,
+                    "email": record.email,
                     "role": record.role,
                 }
 
@@ -250,11 +248,20 @@ class User(API_Resource):
                     400,
                 )
 
+            except sqlalchemy.exc.IntegrityError as e:
+                self.session.rollback()
+                error_message = e.args[0]
+                if "EMAIL_UNIQUE_KEY" in error_message:
+                    return {"message": "email already in use"}, 400
+
+                if "PHONE_NUMBER_UNIQUE_KEY" in error_message:
+                    return {"message": "phone_number already in use"}, 400
+
     def delete(self):
         parser = reqparse.RequestParser()
         parser.add_argument(
             "employee_id",
-            help="Employee ID to fetch details for",
+            help="Employee ID to delete data for",
             required=False,
             type=int,
             location="args",
