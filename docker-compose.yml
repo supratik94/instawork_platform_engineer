@@ -1,27 +1,10 @@
 version: "3"
 services:
-  db:
-    image: mysql:latest
-    restart: always
-    env_file:
-      - .env
-    ports:
-      - "3306:3306"
-    expose:
-      - "3306"
-    volumes:
-      - instawork_db:/var/lib/mysql
-
   flask_app:
     build: .
-    links:
-      - db
     env_file:
       - .env
     ports:
       - "80:80"
     expose:
       - "80"
-
-volumes:
-  instawork_db:
