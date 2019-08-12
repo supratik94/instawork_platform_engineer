@@ -9,9 +9,9 @@ from sqlalchemy_utils import create_database, database_exists
 if __name__ == "__main__":
     connection_string = (
         "mysql+pymysql://"
-        + os.environ["DB_USERNAME"]
+        + os.environ["ROOT_DB_USERNAME"]
         + ":"
-        + os.environ["DB_PASSWORD"]
+        + os.environ["ROOT_DB_PASSWORD"]
         + "@"
         + os.environ["DB_HOST"]
         + "/"
